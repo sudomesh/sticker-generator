@@ -81,6 +81,8 @@ function getNodeInfo(opts, cb) {
     }
 
     var conn = new ssh2();
+
+    console.log("Connecting to " + settings.node_ip + " port " + settings.node_port);
     
     conn
         .on('error', function(err) {
@@ -90,7 +92,10 @@ function getNodeInfo(opts, cb) {
 
             var nodeInfo = {};
 
-            remoteCommand(conn, "cat /proc/cpuinfo", function(err, stdout, stderr) {
+            var cmd = "cat /proc/cpuinfo";
+            debug("Running remote command: " + cmd);
+
+            remoteCommand(conn, cmd, function(err, stdout, stderr) {
                 if(err) {
                     conn.end();
                     return cb(err + "\n" + stderr);
@@ -99,7 +104,10 @@ function getNodeInfo(opts, cb) {
                 nodeInfo.chipset = parseChipset(stdout);
                 nodeInfo.model = parseModel(stdout);
 
-                remoteCommand(conn, "cat /sys/class/net/eth0/address", function(err, stdout, stderr) {
+                var cmd = "cat /sys/class/net/eth0/address";
+                debug("Running remote command: " + cmd);
+
+                remoteCommand(conn, cmd, function(err, stdout, stderr) {
 
                     if(err) {
                         conn.end();
@@ -151,15 +159,21 @@ function generateSticker(nodeInfo, cb) {
     var fileName = tmp.tmpNameSync();
     sticker.saveImage(fileName, function(err) {
         if(err) return cb(err);
+        debug("Wrote sticker image to " + fileName);
         cb(null, fileName);
     });
     
 }
 
 function printSticker(stickerFilePath, cb) {
-    console.error("Not implemented");
 
-    exec("eog " + stickerFilePath, cb);
+    if(argv.debug) {
+        debug("Displaying " + stickerFilePath);
+        exec(settings.print_cmd_debug + ' ' + stickerFilePath, cb);
+    } else {
+        console.log("Printing sticker...");
+        exec(settings.print_cmd + ' ' + stickerFilePath, cb);
+    }
 }
 
 
@@ -188,6 +202,7 @@ getNodeInfo({fake: true}, function(err, nodeInfo) {
                     console.error("Error:", err);
                     process.exit(1);
                 }
+                debug("Deleted temporary sticker file from " + stickerFilePath);
             });
         });
     });

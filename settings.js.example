@@ -4,8 +4,10 @@ module.exports = {
     node_ip: '172.22.0.1', // default IP of unconfigured node
     node_port: 22, // default ssh port of unconfigured node
     node_user: 'root', // default user for unconfigured node
-    node_password: 'mestheplanet' // default password for unconfigured node
+    node_password: 'mestheplanet', // default password for unconfigured node
 
+    print_cmd: "ql570 /dev/usb/lp0 n", // sticker png file path is passed to this command
+    print_cmd_debug: "eog" // used instead if the --debug flag is used
 }
 
 
