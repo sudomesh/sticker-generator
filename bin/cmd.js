@@ -40,7 +40,15 @@ function remoteCommand(conn, cmd, callback) {
     });
 };
 
-var parseModel = function(cpuInfo) {
+function parseMAC(mac) {
+    var m = mac.match(/([A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2})/);
+
+    if(!m) return null;
+
+    return m[1];
+}
+
+function parseModel(cpuInfo) {
     var m;
 
     m = cpuInfo.match(/^machine\s*:\s+(.*)$/im);
@@ -50,7 +58,7 @@ var parseModel = function(cpuInfo) {
     return null;
 }
 
-var parseChipset = function(cpuInfo) {
+function parseChipset(cpuInfo) {
     var m;
 
     m = cpuInfo.match(/^system type\s*:\s+(.*)$/im);
@@ -130,6 +138,19 @@ function getNodeInfo(opts, cb) {
     
 }
 
+// assumes font inconsolata bold 40 px
+function centerPad(str) {
+    var maxLength = 54; // maximum length of humac name given font and size
+    var padding = Math.floor((maxLength - str.length) / 2);
+    
+    var padStr = '';
+    var i;
+    for(i=0; i < padding; i++) {
+        padStr += ' ';
+    }
+    return padStr;
+}
+
 
 function generateSticker(nodeInfo, cb) {
 
@@ -138,21 +159,24 @@ function generateSticker(nodeInfo, cb) {
     var sticker = new StickerGenerator({
         padding: {
             top: 0,
-            bottom: 5
+            bottom: 5,
+            left: 3
         },
         font: {
-            size: 50,
+            size: 40,
             lineSpacing: 22
         }
     });
 
+    var url = "https://begin.peoplesopen.net/";
+
     sticker.writeLine("The name of your node is:", 'normal', 40);
     sticker.writeLine(' ');
-    sticker.writeLine('    ' + humac, 'bold');
+    sticker.writeLine(centerPad(humac) + humac, 'bold');
     sticker.writeLine(' ');
     sticker.writeLine("For first-time configuration go to:", 'normal', 40);
     sticker.writeLine(' ');
-    sticker.writeLine("    https://begin.peoplesopen.net/", 'bold', 50);
+    sticker.writeLine('           ' + url, 'bold', 40);
     sticker.writeLine(' ', 'normal', 20, 40);
     sticker.writeLine("Router model: " + nodeInfo.model, 'normal', 30);
 
@@ -177,7 +201,7 @@ function printSticker(stickerFilePath, cb) {
 }
 
 
-getNodeInfo({fake: true}, function(err, nodeInfo) {
+getNodeInfo({fake: argv.fake}, function(err, nodeInfo) {
     if(err) {
         console.error("Error:", err);
         process.exit(1);

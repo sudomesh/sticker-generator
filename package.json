@@ -12,7 +12,7 @@
     "extend": "^3.0.0",
     "minimist": "^1.2.0",
     "ssh2": "^0.5.1",
-    "sudomesh-human-mac": "0.0.2",
+    "sudomesh-human-mac": "0.0.3",
     "tmp": "0.0.28"
   }
 }
